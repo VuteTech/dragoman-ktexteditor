@@ -1,0 +1,17 @@
+<!DOCTYPE gui SYSTEM "kpartgui.dtd">
+<!--
+  SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+  SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<gui name="dragoman" version="1" translationDomain="dragoman-ktexteditor">
+  <MenuBar>
+    <Menu name="tools">
+      <text>&amp;Tools</text>
+      <separator/>
+      <Action name="dragoman_translate"/>
+      <Action name="dragoman_choose"/>
+      <Action name="dragoman_swap"/>
+    </Menu>
+  </MenuBar>
+</gui>

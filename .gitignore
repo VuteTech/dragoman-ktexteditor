@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+# SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+build/
+build-*/
+# Generated from ECM's template at configure time (KDEClangFormat).
+.clang-format
+# Written into release tarballs only; the version lives in git tags.
+.tarball-version

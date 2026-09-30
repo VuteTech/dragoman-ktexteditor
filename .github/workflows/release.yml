@@ -1,0 +1,167 @@
+# SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+# SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Publishes distribution packages when a GitHub release is published. This
+# is the only workflow that talks to OBS; pushes and pull requests run
+# ci.yml alone.
+#
+# The release tag must be vX.Y.Z and is the only place the version lives:
+# the source tarball carries it in .tarball-version. The workflow runs the
+# full CI on the tagged commit, builds the tarball, attaches it (and its
+# sha256) to the GitHub release, commits it with one build recipe per
+# package format to the OBS package, and waits until OBS has built it for
+# every repository and architecture, failing when any build fails. OBS
+# publishes the packages to its download repositories itself, next to the
+# dragomand packages.
+#
+# Setup (once): repository secrets OBS_USER and OBS_PASSWORD for an
+# account with maintainer rights on the project below. OBS has no token
+# that can upload sources, so the workflow logs in with the password.
+name: Release packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to (re)publish, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write # attach the tarball to the release
+
+concurrency:
+  group: release-packages
+  cancel-in-progress: false
+
+env:
+  OBS_API: https://api.opensuse.org
+  OBS_PROJECT: home:blago:dragomand
+  OBS_PACKAGE: dragoman-ktexteditor
+
+jobs:
+  # The full CI on the tagged commit; nothing is published unless it passes.
+  ci:
+    uses: ./.github/workflows/ci.yml
+    with:
+      ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+  obs:
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Validate the tag
+        id: tag
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            echo "::error::release tag must look like v1.2.3, got '$TAG'"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+
+      - name: Build the source tarball
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: scripts/make-release-tarball.sh --version "$VERSION" dist
+
+      - name: Assemble the OBS package
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          packaging/obs/prepare.sh "$VERSION" "dist/dragoman-ktexteditor-$VERSION.tar.gz" obs-package
+
+      - name: Attach the tarball to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          cd dist
+          sha256sum "dragoman-ktexteditor-$VERSION.tar.gz" > "dragoman-ktexteditor-$VERSION.tar.gz.sha256"
+          gh release upload "$TAG" "dragoman-ktexteditor-$VERSION.tar.gz" \
+            "dragoman-ktexteditor-$VERSION.tar.gz.sha256" --clobber
+
+      - name: Set up osc
+        uses: ./.github/actions/setup-osc
+        with:
+          apiurl: ${{ env.OBS_API }}
+          user: ${{ secrets.OBS_USER }}
+          password: ${{ secrets.OBS_PASSWORD }}
+
+      - name: Commit to OBS
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          if ! osc meta pkg "$OBS_PROJECT" "$OBS_PACKAGE" > /dev/null 2>&1; then
+            osc meta pkg "$OBS_PROJECT" "$OBS_PACKAGE" -F - <<EOF
+          <package name="$OBS_PACKAGE" project="$OBS_PROJECT">
+            <title>Dragoman KTextEditor plugin</title>
+            <description>Offline translation plugin for Kate, KWrite and KDevelop, through the Dragomand daemon.</description>
+            <url>https://github.com/eniac111/dragoman-ktexteditor</url>
+          </package>
+          EOF
+          fi
+          osc checkout -o checkout "$OBS_PROJECT" "$OBS_PACKAGE"
+          cd checkout
+          # Replace everything: the old tarball must go, and a recipe
+          # dropped from the repository must disappear from OBS too.
+          find . -maxdepth 1 -type f ! -name '.*' -delete
+          cp ../obs-package/* .
+          osc addremove
+          osc commit -m "Release $TAG"
+
+  obs-wait:
+    needs: obs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - name: Check out the tag
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+
+      - name: Set up osc
+        uses: ./.github/actions/setup-osc
+        with:
+          apiurl: ${{ env.OBS_API }}
+          user: ${{ secrets.OBS_USER }}
+          password: ${{ secrets.OBS_PASSWORD }}
+
+      - name: Wait for the OBS builds
+        run: |
+          # Poll this package's results instead of `osc results --watch`,
+          # which can keep waiting after every build has finished.
+          # results.py exits 2 while anything is pending, then 1 if a build
+          # failed.
+          deadline=$((SECONDS + 4 * 3600))
+          while :; do
+            # Give the scheduler a moment to notice the new sources.
+            sleep 60
+            xml="$(osc api "/build/$OBS_PROJECT/_result?package=$OBS_PACKAGE")" || continue
+            status=0
+            summary="$(packaging/obs/results.py <<<"$xml")" || status=$?
+            [ "$status" -ne 2 ] && break
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::OBS builds still pending after 4 hours:"
+              echo "$summary"
+              exit 1
+            fi
+          done
+          echo "$summary"
+          if [ "$status" -ne 0 ]; then
+            echo "::error::some OBS builds did not succeed; see https://build.opensuse.org/package/show/$OBS_PROJECT/$OBS_PACKAGE"
+            exit 1
+          fi

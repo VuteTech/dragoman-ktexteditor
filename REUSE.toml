@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+# SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright and licensing for files that cannot carry a comment header
+# (https://reuse.software/spec/). Every other file states both in its own
+# header.
+version = 1
+
+[[annotations]]
+path = [
+    "**.md",
+    "src/dragomanplugin.json.in",
+    "packaging/obs/debian.changelog",
+    "packaging/obs/debian.control",
+    "packaging/obs/dragoman-ktexteditor.dsc",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2026 Blagovest Petrov <blagovest@petrovs.info>",
+    "2026 Vute Tech Ltd. <https://vute.tech>",
+]
+SPDX-License-Identifier = "GPL-3.0-or-later"

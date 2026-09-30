@@ -1,0 +1,33 @@
+Source: dragoman-ktexteditor
+Section: editors
+Priority: optional
+Maintainer: Blagovest Petrov <blagovest@petrovs.info>
+Build-Depends: debhelper-compat (= 13),
+ cmake (>= 3.24),
+ ninja-build,
+ extra-cmake-modules (>= 6.13),
+ gettext,
+ qt6-base-dev (>= 6.8),
+ libkf6config-dev (>= 6.13),
+ libkf6coreaddons-dev (>= 6.13),
+ libkf6i18n-dev (>= 6.13),
+ libkf6texteditor-dev (>= 6.13),
+ libkf6xmlgui-dev (>= 6.13),
+ appstream,
+ dbus-daemon
+Standards-Version: 4.7.0
+Homepage: https://dragomand.l10n-bg.dev
+Vcs-Browser: https://github.com/eniac111/dragoman-ktexteditor
+Vcs-Git: https://github.com/eniac111/dragoman-ktexteditor.git
+Rules-Requires-Root: no
+
+Package: dragoman-ktexteditor
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}, dragomand
+Enhances: kate, kwrite, kdevelop
+Description: offline translation plugin for Kate, KWrite and KDevelop
+ A KTextEditor plugin that translates the selection in place, fully
+ offline, through the Dragomand daemon and Mozilla's Firefox translation
+ models. The Tools menu gains Translate Selection, a language chooser and
+ a swap of the direction; a language pair that is not installed yet is
+ downloaded on first use.

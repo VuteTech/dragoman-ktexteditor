@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+  SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+  SPDX-License-Identifier: CC0-1.0
+-->
+<component type="addon">
+  <id>dev.l10n_bg.dragomand.ktexteditor</id>
+  <extends>org.kde.kate</extends>
+  <extends>org.kde.kwrite</extends>
+  <name>Dragoman Translator</name>
+  <summary>Translate the selection offline through the Dragomand daemon</summary>
+  <description>
+    <p>
+      Translates the selected text in place, fully offline, with Mozilla's
+      Firefox translation models run locally by the Dragomand daemon. The
+      Tools menu gains Translate Selection, a language chooser and a swap
+      of the direction; a language pair that is not installed yet is
+      downloaded on first use.
+    </p>
+  </description>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="dev.l10n_bg">
+    <name>Blagovest Petrov</name>
+  </developer>
+  <url type="homepage">https://dragomand.l10n-bg.dev</url>
+  <url type="bugtracker">https://github.com/eniac111/dragoman-ktexteditor/issues</url>
+  <url type="vcs-browser">https://github.com/eniac111/dragoman-ktexteditor</url>
+</component>

@@ -1,0 +1,18 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "blagovest@petrovs.info",
+                "Name": "Blagovest Petrov"
+            }
+        ],
+        "BugReportUrl": "https://github.com/eniac111/dragoman-ktexteditor/issues",
+        "Description": "Translate the selection in place, fully offline, through the Dragomand daemon",
+        "Icon": "dev.l10n_bg.dragomand",
+        "Id": "dragomanplugin",
+        "License": "GPL-3.0-or-later",
+        "Name": "Dragoman Translator",
+        "Version": "@PROJECT_VERSION@",
+        "Website": "https://dragomand.l10n-bg.dev"
+    }
+}

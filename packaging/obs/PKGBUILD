@@ -1,0 +1,40 @@
+# Maintainer: Blagovest Petrov <blagovest@petrovs.info>
+# SPDX-FileCopyrightText: 2026 Blagovest Petrov <blagovest@petrovs.info>
+# SPDX-FileCopyrightText: 2026 Vute Tech Ltd. <https://vute.tech>
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# @VERSION@ is stamped by packaging/obs/prepare.sh from the release tag.
+
+pkgname=dragoman-ktexteditor
+pkgver=@VERSION@
+pkgrel=1
+pkgdesc="Offline translation plugin for Kate, KWrite and KDevelop, through the Dragomand daemon"
+arch=(x86_64)
+url="https://dragomand.l10n-bg.dev"
+license=(GPL-3.0-or-later)
+makedepends=(cmake ninja extra-cmake-modules qt6-base kconfig kcoreaddons ki18n
+             ktexteditor kxmlgui appstream)
+checkdepends=(dbus)
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cmake -S "$pkgname-$pkgver" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DKDE_INSTALL_USE_QT_SYS_PATHS=ON \
+    -DBUILD_TESTING=ON
+  cmake --build build
+}
+
+check() {
+  ctest --test-dir build --output-on-failure
+}
+
+package() {
+  # Declared here rather than globally: makepkg installs global depends for
+  # the build, and dragomand's BLAS dependency has two providers OBS will
+  # not choose between.
+  depends=(qt6-base kconfig kcoreaddons ki18n ktexteditor kxmlgui dragomand)
+  DESTDIR="$pkgdir" cmake --install build
+}
