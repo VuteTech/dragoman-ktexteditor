@@ -110,7 +110,7 @@ jobs:
           <package name="$OBS_PACKAGE" project="$OBS_PROJECT">
             <title>Dragoman KTextEditor plugin</title>
             <description>Offline translation plugin for Kate, KWrite and KDevelop, through the Dragomand daemon.</description>
-            <url>https://github.com/eniac111/dragoman-ktexteditor</url>
+            <url>https://github.com/VuteTech/dragoman-ktexteditor</url>
           </package>
           EOF
           fi

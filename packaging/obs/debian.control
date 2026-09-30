@@ -17,8 +17,8 @@ Build-Depends: debhelper-compat (= 13),
  dbus-daemon
 Standards-Version: 4.7.0
 Homepage: https://dragomand.l10n-bg.dev
-Vcs-Browser: https://github.com/eniac111/dragoman-ktexteditor
-Vcs-Git: https://github.com/eniac111/dragoman-ktexteditor.git
+Vcs-Browser: https://github.com/VuteTech/dragoman-ktexteditor
+Vcs-Git: https://github.com/VuteTech/dragoman-ktexteditor.git
 Rules-Requires-Root: no
 
 Package: dragoman-ktexteditor

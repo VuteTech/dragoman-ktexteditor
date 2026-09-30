@@ -6,7 +6,7 @@
                 "Name": "Blagovest Petrov"
             }
         ],
-        "BugReportUrl": "https://github.com/eniac111/dragoman-ktexteditor/issues",
+        "BugReportUrl": "https://github.com/VuteTech/dragoman-ktexteditor/issues",
         "Description": "Translate the selection in place, fully offline, through the Dragomand daemon",
         "Icon": "dev.l10n_bg.dragomand",
         "Id": "dragomanplugin",
