@@ -28,7 +28,8 @@ using LanguagePair = std::pair<QString, QString>;
  */
 [[nodiscard]] LanguagePair chooseDirection(const LanguagePair &saved, const QString &text);
 
-/// "bg" becomes "Bulgarian (bg)"; codes QLocale does not know stay as they are.
+/// "bg" becomes "Bulgarian (bg)", the name in the user's language
+/// (libdragoman-qt); codes it does not know stay as they are.
 [[nodiscard]] QString languageLabel(const QString &code);
 
 } // namespace Dragoman

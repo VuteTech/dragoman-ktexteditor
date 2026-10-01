@@ -13,6 +13,7 @@ Build-Depends: debhelper-compat (= 13),
  libkf6i18n-dev (>= 6.13),
  libkf6texteditor-dev (>= 6.13),
  libkf6xmlgui-dev (>= 6.13),
+ libdragoman-qt-dev,
  appstream,
  dbus-daemon
 Standards-Version: 4.7.0

@@ -4,7 +4,7 @@
 
 include(ECMAddTests)
 
+# The D-Bus client is tested in libdragoman-qt.
 ecm_add_tests(
     languagedirectiontest.cpp
-    dragomanclienttest.cpp
     LINK_LIBRARIES dragomancore Qt6::Test)

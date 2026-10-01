@@ -5,8 +5,8 @@
 */
 
 #include "languagedirection.h"
-#include "dragomanclient.h"
 
+#include <QLocale>
 #include <QTest>
 
 using namespace Qt::StringLiterals;
@@ -16,6 +16,13 @@ class LanguageDirectionTest : public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
+    void initTestCase()
+    {
+        // Language names follow the user's language: test in English.
+        qputenv("LANGUAGE", "C");
+        QLocale::setDefault(QLocale::c());
+    }
+
     void chooseDirection_data()
     {
         QTest::addColumn<QString>("source");
@@ -57,15 +64,6 @@ private Q_SLOTS:
     {
         QCOMPARE(Dragoman::languageLabel(u"bg"_s), u"Bulgarian (bg)"_s);
         QCOMPARE(Dragoman::languageLabel(u"xx-not-a-language"_s), u"xx-not-a-language"_s);
-    }
-
-    // The escaping rule of the daemon's D-Bus contract: every character of
-    // the sender's unique name that is not an ASCII letter or digit becomes
-    // '_', including the leading ':'.
-    void requestPath()
-    {
-        QCOMPARE(DragomanClient::requestPath(u":1.42", u"ktexteditor_7_0"), u"/dev/l10n_bg/dragomand/request/_1_42/ktexteditor_7_0"_s);
-        QCOMPARE(DragomanClient::requestPath(u":1.2-x_y", u"t"), u"/dev/l10n_bg/dragomand/request/_1_2_x_y/t"_s);
     }
 };
 

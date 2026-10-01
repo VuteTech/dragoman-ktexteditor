@@ -60,7 +60,7 @@ QObject *DragomanPlugin::createView(KTextEditor::MainWindow *mainWindow)
 DragomanPluginView::DragomanPluginView(DragomanPlugin *plugin, KTextEditor::MainWindow *mainWindow)
     : QObject(plugin)
     , m_mainWindow(mainWindow)
-    , m_client(new DragomanClient(this))
+    , m_client(new Dragoman::Client(this))
 {
     KXMLGUIClient::setComponentName(u"dragoman"_s, i18n("Dragoman"));
     setXMLFile(u"ui.rc"_s);
@@ -80,10 +80,6 @@ DragomanPluginView::DragomanPluginView(DragomanPlugin *plugin, KTextEditor::Main
     connect(swap, &QAction::triggered, this, &DragomanPluginView::swapDirection);
 
     m_actions = {translate, choose, swap};
-
-    connect(m_client, &DragomanClient::progress, this, [this](double fraction, const QString &stage) {
-        setProgressNote(i18n("Preparing the translation model: %1 (%2%)", stage.toHtmlEscaped(), qRound(fraction * 100)));
-    });
 
     m_mainWindow->guiFactory()->addClient(this);
 }
@@ -132,7 +128,11 @@ void DragomanPluginView::chooseAndTranslate()
     if (m_busy) {
         return;
     }
-    m_client->listPairs([this](const DragomanClient::Pairs &pairs, const QString &error) {
+    m_client->listPairs([this](const QList<Dragoman::PairInfo> &records, const QString &error) {
+        QList<Dragoman::LanguagePair> pairs;
+        for (const Dragoman::PairInfo &record : records) {
+            pairs.append({record.source, record.target});
+        }
         if (pairs.isEmpty()) {
             notify(error.isEmpty() ? i18n("The translation daemon reports no language pairs.") : error.toHtmlEscaped(), KTextEditor::Message::Error);
             return;
@@ -141,7 +141,7 @@ void DragomanPluginView::chooseAndTranslate()
     });
 }
 
-void DragomanPluginView::showChooser(const DragomanClient::Pairs &pairs)
+void DragomanPluginView::showChooser(const QList<Dragoman::LanguagePair> &pairs)
 {
     QStringList sources;
     for (const auto &[source, target] : pairs) {
@@ -237,16 +237,22 @@ void DragomanPluginView::runTranslation(KTextEditor::View *view, const QString &
     setBusy(true);
     setProgressNote(i18n("Translating from %1 to %2…", source, target));
     QPointer<KTextEditor::Document> document(view->document());
-    m_client->translate(source, target, segments, [this, document, range, original, lines, where, source, target](const DragomanReply &reply) {
+    // A missing pair is installed first (PreparePair), with progress.
+    Dragoman::Job *job = m_client->translate(source, target, segments);
+    connect(job, &Dragoman::Job::progress, this, [this](double fraction, const QString &stage) {
+        setProgressNote(i18n("Preparing the translation model: %1 (%2%)", stage.toHtmlEscaped(), qRound(fraction * 100)));
+    });
+    connect(job, &Dragoman::Job::finished, this, [this, document, range, original, lines, where, source, target](const Dragoman::Reply &reply) {
         setBusy(false);
         clearProgressNote();
-        if (!reply.ok) {
+        if (!reply.ok()) {
             notify(i18n("Translation failed: %1", reply.error.toHtmlEscaped()), KTextEditor::Message::Error, 8000);
             return;
         }
+        const QStringList translations = reply.translations();
         QStringList merged = lines;
         for (qsizetype k = 0; k < where.size(); ++k) {
-            merged[where.at(k)] = reply.translations.value(k);
+            merged[where.at(k)] = translations.value(k);
         }
         const QString translated = merged.join(u'\n');
         if (!document || document->text(range) != original) {
@@ -255,8 +261,8 @@ void DragomanPluginView::runTranslation(KTextEditor::View *view, const QString &
             return;
         }
         document->replaceText(range, translated);
-        if (!reply.pivot.isEmpty()) {
-            notify(i18n("Translated from %1 to %2 through %3.", source, target, reply.pivot.toHtmlEscaped()), KTextEditor::Message::Information);
+        if (const QString pivot = reply.pivot(); !pivot.isEmpty()) {
+            notify(i18n("Translated from %1 to %2 through %3.", source, target, pivot.toHtmlEscaped()), KTextEditor::Message::Information);
         }
     });
 }

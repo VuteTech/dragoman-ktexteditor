@@ -6,7 +6,7 @@
 
 #include "languagedirection.h"
 
-#include <QLocale>
+#include <languagenames.h>
 
 #include <algorithm>
 #include <array>
@@ -50,11 +50,8 @@ LanguagePair chooseDirection(const LanguagePair &saved, const QString &text)
 
 QString languageLabel(const QString &code)
 {
-    const QLocale locale(code);
-    if (locale.language() == QLocale::C) {
-        return code;
-    }
-    return u"%1 (%2)"_s.arg(QLocale::languageToString(locale.language()), code);
+    const QString name = Dragoman::languageName(code);
+    return name == code ? code : u"%1 (%2)"_s.arg(name, code);
 }
 
 } // namespace Dragoman

@@ -27,6 +27,7 @@ BuildRequires:  cmake(KF6CoreAddons) >= 6.13
 BuildRequires:  cmake(KF6I18n) >= 6.13
 BuildRequires:  cmake(KF6TextEditor) >= 6.13
 BuildRequires:  cmake(KF6XmlGui) >= 6.13
+BuildRequires:  cmake(DragomanQt)
 BuildRequires:  cmake(Qt6Core) >= 6.8
 BuildRequires:  cmake(Qt6DBus) >= 6.8
 BuildRequires:  cmake(Qt6Gui) >= 6.8

@@ -95,6 +95,12 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+      - name: Build and install libdragoman-qt
+        run: |
+          git clone --depth 1 https://github.com/VuteTech/libdragoman-qt.git /tmp/libdragoman-qt
+          cmake -S /tmp/libdragoman-qt -B /tmp/libdragoman-qt/build -G Ninja -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=/usr
+          cmake --build /tmp/libdragoman-qt/build
+          cmake --install /tmp/libdragoman-qt/build
       - name: Configure
         run: |
           git config --global --add safe.directory "$PWD"

@@ -10,10 +10,11 @@ KDevelop load plugins from this namespace; KWrite shares the same
 loader since it became a stripped-down Kate, but exposes fewer UI
 surfaces, so verify there.
 
-Unlike the LibreOffice extension, it talks D-Bus directly with QtDBus.
-`dragomanclient.{h,cpp}` is the reference Qt client for the daemon's
-portal-style request pattern, including install-on-demand via
-`PreparePair` with progress reporting.
+Unlike the LibreOffice extension, it talks D-Bus directly, through
+[libdragoman-qt](https://github.com/VuteTech/libdragoman-qt), the Qt
+client library shared with Krakoman and the other Qt front ends. It
+implements the daemon's portal-style request pattern, including
+install-on-demand via `PreparePair` with progress reporting.
 
 Menu entries (Tools menu, once the plugin is enabled):
 
@@ -43,14 +44,15 @@ Translator** under Settings, Configure Kate, Plugins.
 
 ## Build from source
 
-Needs CMake 3.24, extra-cmake-modules and KF6 (Config, CoreAddons, I18n,
-TextEditor, XmlGui) 6.13 or newer, and Qt 6.8 or newer, plus a running
-Dragomand for actual translation:
+Needs CMake 3.24, extra-cmake-modules,
+[libdragoman-qt](https://github.com/VuteTech/libdragoman-qt), KF6
+(Config, CoreAddons, I18n, TextEditor, XmlGui) 6.13 or newer, and Qt 6.8
+or newer, plus a running Dragomand for actual translation:
 
 ```sh
-cmake -S . -B build -G Ninja -DBUILD_TESTING=ON
+cmake -S . -B build -G Ninja -DBUILD_TESTING=ON   # -DDragomanQt_DIR=<libdragoman-qt build>/buildtree for an uninstalled library
 cmake --build build
-ctest --test-dir build                      # unit tests, and the D-Bus client against a fake daemon
+ctest --test-dir build                      # unit tests (the D-Bus client is tested in libdragoman-qt)
 sudo cmake --install build                  # system-wide
 ```
 

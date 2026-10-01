@@ -64,11 +64,17 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 include(KDEClangFormat)
 include(KDEGitCommitHooks)
 include(ECMDeprecationSettings)
-include(ECMQtDeclareLoggingCategory)
 include(FeatureSummary)
 
-find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core DBus Gui Widgets)
+find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Gui Widgets)
 find_package(KF6 ${KF_MIN_VERSION} REQUIRED COMPONENTS Config CoreAddons I18n TextEditor XmlGui)
+# The Dragomand client library (https://github.com/VuteTech/libdragoman-qt);
+# -DDragomanQt_DIR=<its build directory>/buildtree uses an uninstalled one.
+find_package(DragomanQt 0.0 REQUIRED)
+set_package_properties(DragomanQt PROPERTIES
+    DESCRIPTION "Qt client library for the Dragomand daemon"
+    URL "https://github.com/VuteTech/libdragoman-qt"
+    TYPE REQUIRED)
 
 # Fail the build on any API deprecated up to the minimum versions.
 ecm_set_disabled_deprecation_versions(QT ${QT_MIN_VERSION} KF ${KF_MIN_VERSION})

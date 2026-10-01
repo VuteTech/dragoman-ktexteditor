@@ -13,7 +13,7 @@ arch=(x86_64)
 url="https://dragomand.l10n-bg.dev"
 license=(GPL-3.0-or-later)
 makedepends=(cmake ninja extra-cmake-modules qt6-base kconfig kcoreaddons ki18n
-             ktexteditor kxmlgui appstream)
+             ktexteditor kxmlgui libdragoman-qt appstream)
 checkdepends=(dbus)
 source=("$pkgname-$pkgver.tar.gz")
 sha256sums=('SKIP')
@@ -35,6 +35,6 @@ package() {
   # Declared here rather than globally: makepkg installs global depends for
   # the build, and dragomand's BLAS dependency has two providers OBS will
   # not choose between.
-  depends=(qt6-base kconfig kcoreaddons ki18n ktexteditor kxmlgui dragomand)
+  depends=(qt6-base kconfig kcoreaddons ki18n ktexteditor kxmlgui libdragoman-qt dragomand)
   DESTDIR="$pkgdir" cmake --install build
 }

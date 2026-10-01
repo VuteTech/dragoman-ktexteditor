@@ -7,6 +7,7 @@
 #pragma once
 
 #include "dragomanclient.h"
+#include "languagedirection.h"
 
 #include <KTextEditor/Message>
 #include <KTextEditor/Plugin>
@@ -24,7 +25,7 @@ class QAction;
 /**
  * A KTextEditor plugin (Kate, KWrite, KDevelop) that translates the
  * selection in place through the dragomand daemon, speaking D-Bus directly
- * (see DragomanClient).
+ * (see Dragoman::Client in libdragoman-qt).
  */
 class DragomanPlugin : public KTextEditor::Plugin
 {
@@ -46,7 +47,7 @@ public:
 private:
     void translateSelection();
     void chooseAndTranslate();
-    void showChooser(const DragomanClient::Pairs &pairs);
+    void showChooser(const QList<Dragoman::LanguagePair> &pairs);
     void swapDirection();
     void runTranslation(KTextEditor::View *view, const QString &source, const QString &target);
 
@@ -58,7 +59,7 @@ private:
     void clearProgressNote();
 
     KTextEditor::MainWindow *const m_mainWindow;
-    DragomanClient *const m_client;
+    Dragoman::Client *const m_client;
     QList<QAction *> m_actions;
     QPointer<KTextEditor::Message> m_progressNote;
     bool m_busy = false;
